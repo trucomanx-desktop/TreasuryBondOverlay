@@ -1,6 +1,6 @@
 # about.py
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __package__ = "treasury_bond_overlay"
 __program_name__ = "treasury-bond-overlay"
 __author__ = "Fernando Pujaico Rivera" 
