@@ -1,8 +1,8 @@
 import sys, os, json, signal
-from PyQt5.QtCore import Qt, QTimer, QPoint, QRectF
+from PyQt5.QtCore import Qt, QTimer, QPoint, QRectF, QUrl
 from PyQt5.QtWidgets import (QApplication, QLabel, QWidget, QSystemTrayIcon,
                              QMenu, QInputDialog, QColorDialog)
-from PyQt5.QtGui import QFont, QPainterPath, QRegion, QIcon, QFontMetrics, QColor
+from PyQt5.QtGui import QFont, QPainterPath, QRegion, QIcon, QFontMetrics, QColor, QDesktopServices
 
 import treasury_bond_overlay.about as about
 from treasury_bond_overlay.modules.configure import load_config, save_config
@@ -158,7 +158,7 @@ class TreasuryBondsTray(QSystemTrayIcon):
 
         menu = QMenu(parent)
         ui = self.config["ui_text"]
-        indicators_menu = menu.addMenu(ui["indicators_menu"])
+        indicators_menu = menu.addMenu(f"✅ {ui['indicators_menu']}")
         self.indicator_actions = {}
         labels = {
             "show_maturity": ui["maturity"],
@@ -179,28 +179,59 @@ class TreasuryBondsTray(QSystemTrayIcon):
             action.toggled.connect(lambda checked, option=key: self.set_indicator(option, checked))
             self.indicator_actions[key] = action
 
+        # Interval
         interval_action = menu.addAction(ui["refresh_interval"])
         interval_action.triggered.connect(self.set_refresh_interval)
+        
+        # Min years
         min_years_action = menu.addAction(ui["min_years"])
         min_years_action.triggered.connect(self.set_min_years)
+        
+        # Max years
         max_years_action = menu.addAction(ui["max_years"])
         max_years_action.triggered.connect(self.set_max_years)
+        
+        # Size
         size_action = menu.addAction(ui["font_size"])
         size_action.triggered.connect(self.set_font_size)
+        
+        # Family
         family_action = menu.addAction(ui["font_family"])
         family_action.triggered.connect(self.set_font_family)
+        
+        # Color
         color_action = menu.addAction(ui["font_color"])
         color_action.triggered.connect(self.set_font_color)
-        refresh_action = menu.addAction(ui["refresh_now"])
+        
+        # Refresh
+        refresh_action = menu.addAction(f"🔄 {ui['refresh_now']}")
+        refresh_action.setIcon(QIcon(resource_path('icons', 'arrow-cw-svgrepo-com.svg')))
         refresh_action.triggered.connect(self.window.refresh_indicators)
+        
         menu.addSeparator()
+        
+        # Coffee
+        coffee_action = menu.addAction("☕ Buy me a coffee")
+        coffee_action.setIcon(QIcon(resource_path('icons', 'emote-love.png')))
+        coffee_action.triggered.connect(self.open_coffee_link)
+                
+        
+        # About
         about_action = menu.addAction(f"ℹ️ {ui['about']}")
+        about_action.setIcon(QIcon(resource_path('icons', 'status_help.png')))
         about_action.triggered.connect(self.show_about)
+        
+        # Exit
         exit_action = menu.addAction(f"❌ {ui['exit']}")
+        exit_action.setIcon(QIcon(resource_path('icons', 'application-exit.png')))
         exit_action.triggered.connect(self.exit_app)
+        
         self.setContextMenu(menu)
         self.show()
 
+    def open_coffee_link(self):
+        QDesktopServices.openUrl(QUrl("https://ko-fi.com/trucomanx"))
+    
     def set_indicator(self, name, enabled):
         self.config["indicators"][name] = enabled
         self.save_config()
